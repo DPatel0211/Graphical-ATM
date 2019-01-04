@@ -82,7 +82,7 @@ public class LoginView extends JPanel implements ActionListener {
 	 */
 	
 	private void initAccountField() {
-		JLabel label = new JLabel("Account No.", SwingConstants.RIGHT);
+		JLabel label = new JLabel("Acc. No.:", SwingConstants.RIGHT);
 		label.setBounds(100, 100, 95, 35);
 		label.setLabelFor(accountField);
 		label.setFont(new Font("DialogInput", Font.BOLD, 14));
@@ -99,7 +99,7 @@ public class LoginView extends JPanel implements ActionListener {
 	 */
 	
 	private void initPinField() {
-		JLabel label = new JLabel("PIN", SwingConstants.RIGHT);
+		JLabel label = new JLabel("PIN:", SwingConstants.RIGHT);
 		label.setBounds(100, 140, 95, 35);
 		label.setLabelFor(pinField);
 		label.setFont(new Font("DialogInput", Font.BOLD, 14));
@@ -193,6 +193,8 @@ public class LoginView extends JPanel implements ActionListener {
 		
 		if (source.equals(loginButton)) {
 			manager.login(accountField.getText(), pinField.getPassword());
+			accountField.setText(null);
+			pinField.setText(null);
 		} else if (source.equals(createButton)) {
 			manager.switchTo(ATM.CREATE_VIEW);
 		} else if (source.equals(powerButton)) {
@@ -201,4 +203,6 @@ public class LoginView extends JPanel implements ActionListener {
 			System.err.println("ERROR: Action command not found (" + e.getActionCommand() + ")");
 		}
 	}
+	
+	
 }

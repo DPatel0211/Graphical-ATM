@@ -40,17 +40,26 @@ public class ViewManager {
 	 */
 	
 	public void login(String accountNumber, char[] pin) {
-		account = db.getAccount(Long.valueOf(accountNumber), Integer.valueOf(new String(pin)));
-		
-		if (account == null) {
-			LoginView lv = ((LoginView) views.getComponents()[ATM.LOGIN_VIEW_INDEX]);
-			lv.updateErrorMessage("Invalid account number and/or PIN.");
-		} else {
-			switchTo(ATM.HOME_VIEW);
+		try {
+			account = db.getAccount(Long.valueOf(accountNumber), Integer.valueOf(new String(pin)));
 			
-			LoginView lv = ((LoginView) views.getComponents()[ATM.LOGIN_VIEW_INDEX]);
-			lv.updateErrorMessage("");
+			if (account == null) {
+				LoginView lv = ((LoginView) views.getComponents()[ATM.LOGIN_VIEW_INDEX]);
+				lv.updateErrorMessage("Invalid account number and/or PIN.");
+			} else {
+				switchTo(ATM.HOME_VIEW);
+				
+				LoginView lv = ((LoginView) views.getComponents()[ATM.LOGIN_VIEW_INDEX]);
+				lv.updateErrorMessage("");
+			}
+		} catch (NumberFormatException e) {
+			
 		}
+	}
+	
+	public void logOut() {
+		account = null;
+		switchTo(ATM.LOGIN_VIEW);
 	}
 	
 	/**
@@ -82,8 +91,14 @@ public class ViewManager {
 				db.shutdown();
 				System.exit(0);
 			}
-		} catch (Exception e) {
+		} catch (Exception e) {	
 			e.printStackTrace();
 		}
+	}
+	public long maxAccountNumber() throws SQLException {
+		return db.maxAccountNumber();
+	}
+	public void insertAccount_wrapp(BankAccount acc) {
+		db.insertAccount(acc);
 	}
 }

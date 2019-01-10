@@ -1,5 +1,8 @@
 package view;
 
+import java.awt.*;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -7,11 +10,18 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.stream.IntStream;
 
+import javax.swing.*;
 import javax.imageio.ImageIO;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -19,13 +29,17 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import controller.ViewManager;
+import model.User;
+import model.BankAccount;
 
 @SuppressWarnings("serial")
 public class CreateView extends JPanel implements ActionListener {
 	
 	private ViewManager manager;		// manages interactions between the views, model, and database
 	private JPasswordField pinField;
-//	private JDatePicker dobField;
+	private JComboBox<String> dayField;
+	private JComboBox<String> monthField;
+	private JComboBox<String> yearField;
 	private JTextField phoneFieldone;	
 	private JTextField phoneFieldtwo;
 	private JTextField phoneFieldthree;
@@ -33,8 +47,9 @@ public class CreateView extends JPanel implements ActionListener {
 	private JTextField lnameField;			
 	private JTextField addressField;		
 	private JTextField cityField;				
-//	private JTextField stateField;			
+	private JComboBox<String> stateField;			
 	private JTextField zipField;
+	private JLabel errorMessageLabel;
 	private JButton backButton;
 	private JButton powerButton;
 	private JButton createButton;
@@ -166,21 +181,19 @@ public class CreateView extends JPanel implements ActionListener {
 	
 	private void initPhoneField() {
 		JLabel label = new JLabel("Phone #:", SwingConstants.RIGHT);
-		JLabel open_parentheses = new JLabel("(", SwingConstants.RIGHT);
-		JLabel close_parentheses = new JLabel("(", SwingConstants.RIGHT);
-		JLabel dashone = new JLabel("-", SwingConstants.RIGHT);
-		JLabel dashtwo = new JLabel("-", SwingConstants.RIGHT);
-		JLabel dashthree = new JLabel("-", SwingConstants.RIGHT);
 		label.setBounds(100, 130, 95, 35);
 		label.setLabelFor(phoneFieldone);
 		label.setFont(new Font("DialogInput", Font.BOLD, 14));
 		
+		
 		phoneFieldone = new JTextField(3);
 		phoneFieldtwo = new JTextField(3);
 		phoneFieldthree = new JTextField(4);
-		phoneFieldone.setBounds(205, 130, 40, 35);
-		phoneFieldtwo.setBounds(245, 130, 40, 35);
-		phoneFieldthree.setBounds(285, 130, 40, 35);
+		phoneFieldone.setBounds(205, 130, 40, 30);
+		phoneFieldtwo.setBounds(255, 130, 40, 30);
+		phoneFieldthree.setBounds(305, 130, 40, 30);
+		
+		
 		
 		this.add(label);
 		this.add(phoneFieldone);
@@ -243,6 +256,7 @@ public class CreateView extends JPanel implements ActionListener {
 	private void initStateField() {
 		JLabel label = new JLabel("State:", SwingConstants.RIGHT);
 		label.setBounds(100, 330, 95, 35);
+		label.setLabelFor(stateField);
 		label.setFont(new Font("DialogInput", Font.BOLD, 14));
 		
 		String[] states = { "AK", "AL", "AR", "AZ", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "IA", "ID", "IL", "IN",
@@ -320,7 +334,75 @@ public class CreateView extends JPanel implements ActionListener {
 		}  else if (source.equals(powerButton)) {
 			manager.shutdown();
 		} else if (source.equals(createButton)) {
-			manager.switchTo(ATM.HOME_VIEW);
+			boolean create = true;
+
+			String first = fnameField.getText();
+			String last = fnameField.getText();
+			if (first.equals(null) || last.equals(null) || first.length() > 20 || last.length() > 20) {
+				errorMessageLabel.setText("ERROR: Name Formatted Incorrectly - If your first/last name is greater than 15 characters, then only enter the first 15 characters.");
+				create = false;
+			} 
+			
+			int dob = 0;
+			if (yearField.getSelectedIndex() != 0 || dayField.getSelectedIndex() != 0 || monthField.getSelectedIndex() != 0) {
+				dob = Integer.parseInt((""+(yearField.getSelectedIndex()+1899)+(monthField.getSelectedIndex()+0)+(dayField.getSelectedIndex())));
+			} else {
+				errorMessageLabel.setText("ERROR: Missing Birthday - Make sure to fill in all fields.");
+				create = false;
+
+			}
+			long phone = 0;
+			if( !phoneFieldone.getText().matches("\\d{3}") || !phoneFieldtwo.getText().matches("\\d{3}") || !phoneFieldthree.getText().matches("\\d{4}")) {
+				errorMessageLabel.setText("ERROR: Phone Number Formatted Incorrectly - Make sure to fill in the correct numbers in each appropriate field.");
+				create = false;
+			} else {
+				phone = Long.parseLong((phoneFieldone.getText()+phoneFieldtwo.getText()+phoneFieldthree.getText()));
+			}
+			
+			
+			String address = addressField.getText();
+			String city = cityField.getText();
+			String state = stateField.getItemAt(stateField.getSelectedIndex());
+			String zip = zipField.getText();
+			//TODO -- check if postal is numeric
+			if(address.equals(null) || city.equals(null) || state.equals("") || !zip.matches("\\d{5}") || address.length() > 30 || city.length() > 30 || zip.length() != 5) {
+				errorMessageLabel.setText("Residency Formatted Incorrectly");
+				create = false;
+			}
+			
+			//TODO check if the length is 4
+			char[] pinChars = null;
+			if(!pinField.getPassword().equals(null)) {
+				pinChars= pinField.getPassword();
+				for( char digit : pinChars) {
+					if (!Character.isDigit(digit)) {
+						errorMessageLabel.setText("PIN Formatted Incorrectly");
+						create = false;
+					}
+				}
+			}
+			
+			long num = 0;
+			try {
+				num = manager.maxAccountNumber()+1;
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+			
+			if(create) {
+				String pinString = "";
+				for (char ch : pinChars) {
+					pinString += ch;
+				}
+				int pin = Integer.parseInt(pinString); 
+				User user = new User(pin, dob, phone, first, last, address, city, state, zip);
+				BankAccount acc = new BankAccount('Y',num,0,user);
+				manager.insertAccount_wrapp(acc);
+				manager.login(String.valueOf(num), pinChars);
+				this.removeAll();
+				initialize();
+				manager.switchTo(ATM.HOME_VIEW);
+			}
 		}
 		
 		// TODO

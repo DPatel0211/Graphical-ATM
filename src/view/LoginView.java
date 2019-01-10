@@ -2,12 +2,9 @@ package view;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -44,8 +41,29 @@ public class LoginView extends JPanel implements ActionListener {
 		super();
 		
 		this.manager = manager;
-		this.errorMessageLabel = new JLabel("", SwingConstants.CENTER);
 		initialize();
+	}
+	
+	///////////////////// GETTERS & SETTERS ///////////////////////////////////////////
+	
+	/**
+	 * Retrieves the account field.
+	 * 
+	 * @return
+	 */
+	
+	public JTextField getAccountField() {
+		return accountField;
+	}
+	
+	/**
+	 * Retrieves the PIN field.
+	 * 
+	 * @return
+	 */
+	
+	public JPasswordField getPinField() {
+		return pinField;
 	}
 	
 	///////////////////// INSTANCE METHODS ////////////////////////////////////////////
@@ -58,6 +76,16 @@ public class LoginView extends JPanel implements ActionListener {
 	
 	public void updateErrorMessage(String errorMessage) {
 		errorMessageLabel.setText(errorMessage);
+	}
+	
+	/**
+	 * Clears the account and PIN fields, as well as the error message.
+	 */
+	
+	public void clear() {
+		accountField.setText("");
+		pinField.setText("");
+		errorMessageLabel.setText("");
 	}
 	
 	///////////////////// PRIVATE METHODS /////////////////////////////////////////////
@@ -124,6 +152,7 @@ public class LoginView extends JPanel implements ActionListener {
 	}
 	
 	private void initErrorMessageLabel() {
+		errorMessageLabel = new JLabel("", SwingConstants.CENTER);
 		errorMessageLabel.setBounds(0, 240, 500, 35);
 		errorMessageLabel.setFont(new Font("DialogInput", Font.ITALIC, 14));
 		errorMessageLabel.setForeground(Color.RED);

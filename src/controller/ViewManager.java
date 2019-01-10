@@ -48,12 +48,11 @@ public class ViewManager {
 				lv.updateErrorMessage("Invalid account number and/or PIN.");
 			} else {
 				switchTo(ATM.HOME_VIEW);
-				
 				LoginView lv = ((LoginView) views.getComponents()[ATM.LOGIN_VIEW_INDEX]);
 				lv.updateErrorMessage("");
 			}
 		} catch (NumberFormatException e) {
-			
+			// ignore
 		}
 	}
 	
@@ -91,7 +90,7 @@ public class ViewManager {
 				db.shutdown();
 				System.exit(0);
 			}
-		} catch (Exception e) {	
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

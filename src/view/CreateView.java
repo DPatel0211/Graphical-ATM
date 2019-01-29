@@ -338,8 +338,8 @@ public class CreateView extends JPanel implements ActionListener {
 
 			String first = fnameField.getText();
 			String last = fnameField.getText();
-			if (first.equals(null) || last.equals(null) || first.length() > 20 || last.length() > 20) {
-				errorMessageLabel.setText("ERROR: Name Formatted Incorrectly - If your first/last name is greater than 15 characters, then only enter the first 15 characters.");
+			if (first.equals(null) || last.equals(null) || first.length() > 15 || last.length() > 20) {
+				errorMessageLabel.setText("Name Formatted Incorrectly - If your first name is greater than 15 characters or your last is greater than 20 please only enter the first 15/20 characters.");
 				create = false;
 			} 
 			
@@ -347,25 +347,25 @@ public class CreateView extends JPanel implements ActionListener {
 			if (yearField.getSelectedIndex() != 0 || dayField.getSelectedIndex() != 0 || monthField.getSelectedIndex() != 0) {
 				dob = Integer.parseInt((""+(yearField.getSelectedIndex()+1899)+(monthField.getSelectedIndex()+0)+(dayField.getSelectedIndex())));
 			} else {
-				errorMessageLabel.setText("ERROR: Missing Birthday - Make sure to fill in all fields.");
+				errorMessageLabel.setText("Fill in all fields (Birthday missing)");
 				create = false;
 
 			}
 			long phone = 0;
 			if( !phoneFieldone.getText().matches("\\d{3}") || !phoneFieldtwo.getText().matches("\\d{3}") || !phoneFieldthree.getText().matches("\\d{4}")) {
-				errorMessageLabel.setText("ERROR: Phone Number Formatted Incorrectly - Make sure to fill in the correct numbers in each appropriate field.");
+				errorMessageLabel.setText("Phone Number Formatted Incorrectly");
 				create = false;
 			} else {
 				phone = Long.parseLong((phoneFieldone.getText()+phoneFieldtwo.getText()+phoneFieldthree.getText()));
 			}
 			
 			
-			String address = addressField.getText();
-			String city = cityField.getText();
-			String state = stateField.getItemAt(stateField.getSelectedIndex());
+			String a = addressField.getText();
+			String c = cityField.getText();
+			String s = stateField.getItemAt(stateField.getSelectedIndex());
 			String zip = zipField.getText();
 			//TODO -- check if postal is numeric
-			if(address.equals(null) || city.equals(null) || state.equals("") || !zip.matches("\\d{5}") || address.length() > 30 || city.length() > 30 || zip.length() != 5) {
+			if(a.equals(null) || c.equals(null) || s.equals("") || !zip.matches("\\d{5}") || a.length() > 30 || c.length() > 30 || zip.length() != 5) {
 				errorMessageLabel.setText("Residency Formatted Incorrectly");
 				create = false;
 			}
@@ -395,7 +395,7 @@ public class CreateView extends JPanel implements ActionListener {
 					pinString += ch;
 				}
 				int pin = Integer.parseInt(pinString); 
-				User user = new User(pin, dob, phone, first, last, address, city, state, zip);
+				User user = new User(pin, dob, phone, first, last, a, c, s, zip);
 				BankAccount acc = new BankAccount('Y',num,0,user);
 				manager.insertAccount_wrapp(acc);
 				manager.login(String.valueOf(num), pinChars);
